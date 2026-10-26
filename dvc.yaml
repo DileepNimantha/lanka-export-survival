@@ -53,3 +53,19 @@ stages:
     plots:
       - plots/importance.png:
           cache: false
+
+  explain:
+    cmd: uv run python -m src.explain
+    deps:
+      - src/explain.py
+      - models/model.joblib
+      - data/processed/eval.csv
+      - run_info.json
+    params:
+      - explain
+    outs:
+      - explain_summary.json:
+          cache: false
+    plots:
+      - plots/explain:
+          cache: false
