@@ -9,14 +9,14 @@ dependencies = [
     "uvicorn[standard]>=0.32",
     "pydantic>=2.9",
     "pandas>=2.2",
-    "catboost>=1.2.7",
     "azure-monitor-opentelemetry>=1.6",
+    "interpret-core>=0.7",
+    "scikit-learn>=1.5",
+    "joblib>=1.4",
 ]
 
 [dependency-groups]
 ml = [
-    "scikit-learn>=1.5",
-    "xgboost>=2.1",
     "pandera>=0.24",
     "shap>=0.46",
     "matplotlib>=3.9",

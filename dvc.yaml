@@ -34,7 +34,7 @@ stages:
     params:
       - model
     outs:
-      - models/model.cbm
+      - models/model.joblib
       - run_info.json:
           cache: false
 
@@ -43,7 +43,7 @@ stages:
     deps:
       - src/evaluate.py
       - src/metrics.py
-      - models/model.cbm
+      - models/model.joblib
       - data/processed/eval.csv
     params:
       - evaluate.top_k_fraction
@@ -51,5 +51,5 @@ stages:
       - eval_metrics.json:
           cache: false
     plots:
-      - plots/shap_summary.png:
+      - plots/importance.png:
           cache: false

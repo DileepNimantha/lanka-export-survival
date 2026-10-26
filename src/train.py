@@ -1,17 +1,20 @@
-"""Train the production CatBoost model and log it to MLflow."""
+"""Train the production Explainable Boosting Machine and log it to MLflow."""
 
 import hashlib
 import json
 import os
 import subprocess
 
+import joblib
 import mlflow
 import pandas as pd
-from catboost import CatBoostClassifier
+from interpret.glassbox import ExplainableBoostingClassifier
 from mlflow.models import infer_signature
 
 from src import tracking
 from src.config import ROOT, load_params
+
+MODEL_PATH = ROOT / "models" / "model.joblib"
 
 
 def git_sha() -> str:
@@ -29,6 +32,11 @@ def file_md5(path) -> str:
     return hashlib.md5(path.read_bytes()).hexdigest()
 
 
+def make_ebm(settings: dict, columns: list[str], cat_features: list[str]):
+    feature_types = ["nominal" if c in cat_features else "auto" for c in columns]
+    return ExplainableBoostingClassifier(**settings, feature_types=feature_types, n_jobs=-1)
+
+
 def main() -> None:
     params = load_params()
     m = params["model"]
@@ -40,9 +48,9 @@ def main() -> None:
         print("WARNING: DAGSHUB_OWNER / DAGSHUB_TOKEN not set, logging to a local MLflow store.")
     mlflow.set_experiment(m["experiment"])
 
-    with mlflow.start_run(run_name="catboost-pipeline") as run:
+    with mlflow.start_run(run_name="ebm-pipeline") as run:
         mlflow.set_tags({"git_sha": git_sha(), "source": "dvc-pipeline"})
-        mlflow.log_params({**m["catboost"], "train_rows": len(df)})
+        mlflow.log_params({**m["ebm"], "train_rows": len(df)})
         mlflow.log_params(
             {
                 "train_positive_rate": round(float(y.mean()), 4),
@@ -50,17 +58,18 @@ def main() -> None:
             }
         )
 
-        model = CatBoostClassifier(**m["catboost"], cat_features=m["cat_features"], verbose=100)
+        model = make_ebm(m["ebm"], list(X.columns), m["cat_features"])
         model.fit(X, y)
 
-        out = ROOT / "models" / "model.cbm"
-        out.parent.mkdir(exist_ok=True)
-        model.save_model(str(out))  # CatBoost's own binary format, not a pickle
+        MODEL_PATH.parent.mkdir(exist_ok=True)
+        joblib.dump(model, MODEL_PATH)  # a pickle: only load model files this pipeline made
 
         sample = X.head(200)
-        info = mlflow.catboost.log_model(
+        info = mlflow.sklearn.log_model(
             model,
             name="model",
+            # MLflow saves with skops, which only loads types it is told to trust
+            skops_trusted_types=[f"{type(model).__module__}.{type(model).__qualname__}"],
             signature=infer_signature(sample, model.predict_proba(sample)[:, 1]),
             input_example=X.head(3),
         )

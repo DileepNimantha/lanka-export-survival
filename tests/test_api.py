@@ -1,8 +1,9 @@
 import os
 
+import joblib
 import pytest
-from catboost import CatBoostClassifier
 from fastapi.testclient import TestClient
+from interpret.glassbox import ExplainableBoostingClassifier
 
 from src.data import CAT_FEATURES, FEATURES
 from tests.conftest import make_rows
@@ -12,10 +13,13 @@ from tests.conftest import make_rows
 def client(tmp_path_factory):
     # Train a tiny model on synthetic data so the API can be tested without the real model.
     df = make_rows(300)
-    model = CatBoostClassifier(iterations=20, verbose=0, cat_features=CAT_FEATURES)
+    feature_types = ["nominal" if c in CAT_FEATURES else "auto" for c in FEATURES]
+    model = ExplainableBoostingClassifier(
+        feature_types=feature_types, interactions=0, outer_bags=1, max_rounds=50
+    )
     model.fit(df[FEATURES], df["y"])
-    path = tmp_path_factory.mktemp("model") / "model.cbm"
-    model.save_model(str(path))
+    path = tmp_path_factory.mktemp("model") / "model.joblib"
+    joblib.dump(model, path)
     os.environ["MODEL_PATH"] = str(path)
 
     import importlib

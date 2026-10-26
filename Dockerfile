@@ -13,7 +13,7 @@ WORKDIR /app
 COPY --from=builder /app/.venv /app/.venv
 ENV PATH="/app/.venv/bin:$PATH" PYTHONUNBUFFERED=1
 COPY app/ app/
-COPY models/model.cbm models/model.cbm
+COPY models/model.joblib models/model.joblib
 ARG MODEL_VERSION=dev
 ENV MODEL_VERSION=${MODEL_VERSION}
 USER appuser

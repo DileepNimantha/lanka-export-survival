@@ -7,19 +7,20 @@ Exit code 0 = passed, 1 = failed. A markdown report is written for the pull requ
 import argparse
 import sys
 
+import joblib
 import mlflow
 import pandas as pd
-from catboost import CatBoostClassifier
 from mlflow.exceptions import MlflowException
 
 from src import tracking
 from src.config import ROOT, load_params
 from src.metrics import score
+from src.train import MODEL_PATH
 
 
 def load_champion(name: str):
     try:
-        return mlflow.catboost.load_model(f"models:/{name}@champion")
+        return mlflow.sklearn.load_model(f"models:/{name}@champion")
     except MlflowException as err:
         print(f"No champion found ({err.error_code}); the first model passes automatically.")
         return None
@@ -36,8 +37,7 @@ def main() -> int:
     df = pd.read_csv(ROOT / params["data"]["processed_dir"] / "eval.csv")
     X, y = df.drop(columns=["y"]), df["y"]
 
-    challenger = CatBoostClassifier()
-    challenger.load_model(str(ROOT / "models" / "model.cbm"))
+    challenger = joblib.load(MODEL_PATH)
     new = score(y, challenger.predict_proba(X)[:, 1], e["top_k_fraction"])
 
     champion = load_champion(params["model"]["name"])
