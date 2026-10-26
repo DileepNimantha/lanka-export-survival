@@ -10,5 +10,7 @@ monitoring/*.csv
 monitoring/*.json
 monitoring/*.html
 gate_report.md
-.env.DS_Store
+.env
+.DS_Store
 docs/*.pdf
+data/cache/

@@ -51,7 +51,7 @@ def main() -> None:
     cats = params["model"]["cat_features"]
     k = params["evaluate"]["top_k_fraction"]
     data_dir = ROOT / params["data"]["processed_dir"]
-    train, val = pd.read_csv(data_dir / "train.csv"), pd.read_csv(data_dir / "eval.csv")
+    train, val = pd.read_csv(data_dir / "train.csv"), pd.read_csv(data_dir / "val.csv")
     X_tr, y_tr = train.drop(columns=["y"]), train["y"]
     X_val, y_val = val.drop(columns=["y"]), val["y"]
     numeric = [c for c in X_tr.columns if c not in cats]

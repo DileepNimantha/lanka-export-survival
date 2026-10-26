@@ -1,0 +1,148 @@
+schema: '2.0'
+stages:
+  download:
+    cmd: uv run python -m src.download
+    deps:
+    - path: src/download.py
+      hash: md5
+      md5: bd958411a84f5297345d55e2113ed36e
+      size: 3200
+    params:
+      params.yaml:
+        data.exporter_code: 144
+        data.products: data/raw/product_codes.csv
+        data.raw: data/raw/sl_exports.csv
+        data.url: 
+          https://www.cepii.fr/DATA_DOWNLOAD/baci/data/BACI_HS12_V202601.zip
+    outs:
+    - path: data/raw/product_codes.csv
+      hash: md5
+      md5: b60c01b022f7e28bc70ac2cb427e64e9
+      size: 573394
+    - path: data/raw/sl_exports.csv
+      hash: md5
+      md5: 27ce13dc165b408f5d581d691096d3b6
+      size: 37947577
+  prepare:
+    cmd: uv run python -m src.data
+    deps:
+    - path: data/production/labelled.csv
+      hash: md5
+      md5: af17e20ac0918fb35d2b5d5eb67c69d2
+      size: 187
+    - path: data/raw/sl_exports.csv
+      hash: md5
+      md5: 27ce13dc165b408f5d581d691096d3b6
+      size: 37947577
+    - path: src/data.py
+      hash: md5
+      md5: 58383195b0eab100858ac9b799491d3a
+      size: 6044
+    params:
+      params.yaml:
+        data:
+          url: 
+            https://www.cepii.fr/DATA_DOWNLOAD/baci/data/BACI_HS12_V202601.zip
+          exporter_code: 144
+          raw: data/raw/sl_exports.csv
+          products: data/raw/product_codes.csv
+          production: data/production/labelled.csv
+          processed_dir: data/processed
+          first_year: 2014
+          train_years:
+          - 2014
+          - 2015
+          - 2016
+          - 2018
+          val_years:
+          - 2019
+          test_years:
+          - 2020
+          - 2021
+          future_years:
+          - 2022
+          - 2023
+          holdout_frac: 0.3
+          drop_columns:
+          - value_next
+    outs:
+    - path: data/processed/eval.csv
+      hash: md5
+      md5: 10a34035fcc4b460486eed8eba127143
+      size: 9808633
+    - path: data/processed/future.csv
+      hash: md5
+      md5: 50aa8710d03aa514b84d55a040e458f1
+      size: 10542013
+    - path: data/processed/train.csv
+      hash: md5
+      md5: 602d1042e47497c11a1abd3b1e6ef4e7
+      size: 17493771
+    - path: data/processed/val.csv
+      hash: md5
+      md5: 678096fa18dc35a498c238ed3eb4d192
+      size: 5092341
+  train:
+    cmd: uv run python -m src.train
+    deps:
+    - path: data/processed/train.csv
+      hash: md5
+      md5: 602d1042e47497c11a1abd3b1e6ef4e7
+      size: 17493771
+    - path: src/train.py
+      hash: md5
+      md5: 4e64a2b11be045adad37da9012176863
+      size: 2283
+    params:
+      params.yaml:
+        model:
+          name: lanka-export-survival
+          experiment: lanka-export-survival
+          cat_features:
+          - hs_chapter
+          - destination
+          catboost:
+            iterations: 400
+            learning_rate: 0.05
+            depth: 6
+            random_seed: 42
+    outs:
+    - path: models/model.cbm
+      hash: md5
+      md5: 83505caa8d2149eba39d2bd148610446
+      size: 6554904
+    - path: run_info.json
+      hash: md5
+      md5: 2b96862fcdd23c4cf3229a46f61623d3
+      size: 112
+  evaluate:
+    cmd: uv run python -m src.evaluate
+    deps:
+    - path: data/processed/eval.csv
+      hash: md5
+      md5: 10a34035fcc4b460486eed8eba127143
+      size: 9808633
+    - path: models/model.cbm
+      hash: md5
+      md5: 83505caa8d2149eba39d2bd148610446
+      size: 6554904
+    - path: src/evaluate.py
+      hash: md5
+      md5: 86fcd7b8f24c2c19285077180c6a50b2
+      size: 1834
+    - path: src/metrics.py
+      hash: md5
+      md5: 6109caa6dc2ee415734a340ba8eddea8
+      size: 848
+    params:
+      params.yaml:
+        evaluate.top_k_fraction: 0.2
+    outs:
+    - path: eval_metrics.json
+      hash: md5
+      md5: 8e12bc793eb44b45636526178208aa51
+      size: 206
+    - path: plots/shap_summary.png
+      hash: md5
+      md5: d3727c3e5c4fee4baa717cda23c85e35
+      size: 98370

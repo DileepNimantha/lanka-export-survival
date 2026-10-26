@@ -1,9 +1,9 @@
 """Simulate production traffic against the live API, then send the real outcomes as feedback.
 
 Modes:
-  normal     random rows from the training period: what "no drift" looks like
-  future     the newest rows of the dataset, in date order: real drift
-  pdays-bug  like future, but an upstream system now sends pdays=-1 instead of 999
+  normal     random rows from the training years: what "no drift" looks like
+  future     the newest years (2022-2023), in date order: real drift
+  share-bug  like future, but an upstream system now sends market_share as a percentage
 
 Example:
   uv run python replayer/replay.py https://<app-url> --mode future --rows 3000
@@ -27,15 +27,15 @@ def load_rows(mode: str, rows: int, start: int) -> pd.DataFrame:
         df = pd.read_csv(processed / "train.csv").sample(rows, random_state=7)
     else:
         df = pd.read_csv(processed / "future.csv").iloc[start : start + rows]
-    if mode == "pdays-bug":
-        df = df.assign(pdays=df["pdays"].replace(999, -1))
+    if mode == "share-bug":
+        df = df.assign(market_share=df["market_share"] * 100)
     return df
 
 
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("url", help="base URL of the API, without a trailing slash")
-    parser.add_argument("--mode", choices=["normal", "future", "pdays-bug"], default="future")
+    parser.add_argument("--mode", choices=["normal", "future", "share-bug"], default="future")
     parser.add_argument("--rows", type=int, default=3000)
     parser.add_argument("--start", type=int, default=0, help="first future row to send")
     parser.add_argument("--workers", type=int, default=8)
@@ -72,7 +72,7 @@ def main() -> None:
         mean_probability = sum(body["probability"] for _, body in ok) / len(ok)
         print(
             f"mean predicted probability {mean_probability:.3f}, "
-            f"actual subscribe rate {sum(outcomes[i] for i, _ in ok) / len(ok):.3f}"
+            f"actual stop rate {sum(outcomes[i] for i, _ in ok) / len(ok):.3f}"
         )
 
     if args.no_feedback or not ok:

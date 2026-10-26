@@ -5,21 +5,24 @@ stages:
       - src/download.py
     params:
       - data.url
+      - data.exporter_code
       - data.raw
+      - data.products
     outs:
-      - data/raw/bank-additional-full.csv
+      - data/raw/sl_exports.csv
+      - data/raw/product_codes.csv
 
   prepare:
     cmd: uv run python -m src.data
     deps:
       - src/data.py
-      - data/raw/bank-additional-full.csv
+      - data/raw/sl_exports.csv
       - data/production/labelled.csv
     params:
       - data
-      - model.cat_features
     outs:
       - data/processed/train.csv
+      - data/processed/val.csv
       - data/processed/eval.csv
       - data/processed/future.csv
 
