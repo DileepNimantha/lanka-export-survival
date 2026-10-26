@@ -1,18 +1,22 @@
 data:
-  url: https://archive.ics.uci.edu/static/public/222/bank+marketing.zip
-  raw: data/raw/bank-additional-full.csv
+  url: https://www.cepii.fr/DATA_DOWNLOAD/baci/data/BACI_HS12_V202601.zip
+  exporter_code: 144     # Sri Lanka in BACI's country codes
+  raw: data/raw/sl_exports.csv
+  products: data/raw/product_codes.csv
   production: data/production/labelled.csv
   processed_dir: data/processed
-  history_frac: 0.8      # oldest 80% of rows = history we train on; newest 20% = "future" for the replayer
-  val_frac: 0.2          # random share of history held out to evaluate the first model
+  first_year: 2014       # needs two earlier years (2012, 2013) for the history features
+  train_years: [2014, 2015, 2016, 2018]   # 2017 left out: BACI's 2018 data has a reporting dip, so many 2017 flows look like they stopped
+  val_years: [2019]      # model selection and tuning
+  test_years: [2020, 2021]    # final evaluation and the quality gate (eval.csv)
+  future_years: [2022, 2023]  # "future" for the replayer: COVID recovery and the economic crisis
   holdout_frac: 0.3      # newest share of labelled production data used to judge retrained models
-  drop_columns: ['duration']   # only known after the call, so it leaks the answer
-  seed: 42
+  drop_columns: ['value_next']   # next year's value is the answer itself, so it must never be a feature
 
 model:
-  name: bank-marketing   # name in the MLflow model registry
-  experiment: bank-marketing
-  cat_features: [job, marital, education, default, housing, loan, contact, month, day_of_week, poutcome]
+  name: lanka-export-survival   # name in the MLflow model registry
+  experiment: lanka-export-survival
+  cat_features: [hs_chapter, destination]
   catboost:
     iterations: 400
     learning_rate: 0.05
@@ -20,7 +24,7 @@ model:
     random_seed: 42
 
 evaluate:
-  top_k_fraction: 0.2    # the call centre can only call the top 20% of leads
+  top_k_fraction: 0.2    # analysts can only review the 20% of flows most at risk
   gate_metric: pr_auc    # metric a challenger must improve to replace the champion
   gate_min_delta: 0.0
 

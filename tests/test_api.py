@@ -4,7 +4,7 @@ import pytest
 from catboost import CatBoostClassifier
 from fastapi.testclient import TestClient
 
-from src.data import CATEGORIES, FEATURES
+from src.data import CAT_FEATURES, FEATURES
 from tests.conftest import make_rows
 
 
@@ -12,7 +12,7 @@ from tests.conftest import make_rows
 def client(tmp_path_factory):
     # Train a tiny model on synthetic data so the API can be tested without the real model.
     df = make_rows(300)
-    model = CatBoostClassifier(iterations=20, verbose=0, cat_features=list(CATEGORIES))
+    model = CatBoostClassifier(iterations=20, verbose=0, cat_features=CAT_FEATURES)
     model.fit(df[FEATURES], df["y"])
     path = tmp_path_factory.mktemp("model") / "model.cbm"
     model.save_model(str(path))
@@ -43,13 +43,13 @@ def test_predict(client, payload):
     assert body["request_id"]
 
 
-def test_contract_rejects_negative_pdays(client, payload):
-    payload["pdays"] = -1
+def test_contract_rejects_share_given_as_percent(client, payload):
+    payload["market_share"] = 35.0
     assert client.post("/predict", json=payload).status_code == 422
 
 
-def test_contract_rejects_unknown_job(client, payload):
-    payload["job"] = "astronaut"
+def test_contract_rejects_bad_destination_code(client, payload):
+    payload["destination"] = "Sri Lanka"
     assert client.post("/predict", json=payload).status_code == 422
 
 

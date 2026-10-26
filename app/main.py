@@ -53,7 +53,7 @@ async def lifespan(_: FastAPI):
     STATE.clear()
 
 
-app = FastAPI(title="Bank marketing propensity API", lifespan=lifespan)
+app = FastAPI(title="Sri Lanka export survival API", lifespan=lifespan)
 
 
 @app.get("/health")
