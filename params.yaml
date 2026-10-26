@@ -29,6 +29,12 @@ evaluate:
   gate_metric: pr_auc    # metric a challenger must improve to replace the champion
   gate_min_delta: 0.0
 
+explain:
+  sample_rows: 500       # test-year flows explained with SHAP and used for the effect directions
+  background_rows: 100   # SHAP background sample
+  top_features: 6        # shape-function and partial dependence panels
+  seed: 0
+
 monitor:
   drift_share_threshold: 0.3   # retrain when at least 30% of features have drifted...
   min_labelled_rows: 1000      # ...and we have enough labelled production rows to learn from

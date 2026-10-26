@@ -1,0 +1,204 @@
+{
+  "ebm_importance": {
+    "destination": 0.727,
+    "n_destinations": 0.649,
+    "value": 0.403,
+    "market_suppliers": 0.377,
+    "years_exported": 0.331,
+    "n_products_to_destination": 0.314,
+    "value_prev2": 0.308,
+    "value_prev": 0.206,
+    "hs_chapter": 0.168,
+    "world_value": 0.148,
+    "market_share": 0.13,
+    "market_value": 0.096,
+    "price_ratio": 0.047
+  },
+  "shap_importance": {
+    "n_destinations": 0.805,
+    "destination": 0.719,
+    "market_suppliers": 0.564,
+    "value": 0.513,
+    "value_prev2": 0.313,
+    "years_exported": 0.3,
+    "value_prev": 0.245,
+    "world_value": 0.204,
+    "hs_chapter": 0.194,
+    "n_products_to_destination": 0.18,
+    "market_share": 0.126,
+    "market_value": 0.093,
+    "price_ratio": 0.049
+  },
+  "ebm_vs_shap_rank_correlation": 0.918,
+  "directions": [
+    {
+      "feature": "value",
+      "spearman": -1.0,
+      "observed": "higher -> less risk",
+      "expected": "higher -> less risk",
+      "agrees": true
+    },
+    {
+      "feature": "value_prev",
+      "spearman": -0.976,
+      "observed": "higher -> less risk",
+      "expected": "higher -> less risk",
+      "agrees": true
+    },
+    {
+      "feature": "value_prev2",
+      "spearman": -0.958,
+      "observed": "higher -> less risk",
+      "expected": null,
+      "agrees": null
+    },
+    {
+      "feature": "years_exported",
+      "spearman": -1.0,
+      "observed": "higher -> less risk",
+      "expected": "higher -> less risk",
+      "agrees": true
+    },
+    {
+      "feature": "market_value",
+      "spearman": -0.982,
+      "observed": "higher -> less risk",
+      "expected": null,
+      "agrees": null
+    },
+    {
+      "feature": "market_share",
+      "spearman": -0.978,
+      "observed": "higher -> less risk",
+      "expected": "higher -> less risk",
+      "agrees": true
+    },
+    {
+      "feature": "market_suppliers",
+      "spearman": -1.0,
+      "observed": "higher -> less risk",
+      "expected": null,
+      "agrees": null
+    },
+    {
+      "feature": "world_value",
+      "spearman": 0.96,
+      "observed": "higher -> more risk",
+      "expected": null,
+      "agrees": null
+    },
+    {
+      "feature": "price_ratio",
+      "spearman": -0.011,
+      "observed": "flat",
+      "expected": null,
+      "agrees": null
+    },
+    {
+      "feature": "n_destinations",
+      "spearman": -0.984,
+      "observed": "higher -> less risk",
+      "expected": "higher -> less risk",
+      "agrees": true
+    },
+    {
+      "feature": "n_products_to_destination",
+      "spearman": 0.764,
+      "observed": "higher -> more risk",
+      "expected": null,
+      "agrees": null
+    }
+  ],
+  "examples": [
+    {
+      "case": "stopped, predicted high risk",
+      "risk": 0.984,
+      "stopped": 1,
+      "features": {
+        "value": 0.002,
+        "value_prev": 0.0,
+        "value_prev2": 0.0,
+        "years_exported": 1,
+        "market_value": 56.182,
+        "market_share": 3.55986e-05,
+        "market_suppliers": 4,
+        "world_value": 198493.626,
+        "price_ratio": 1.0,
+        "n_destinations": 1,
+        "n_products_to_destination": 583,
+        "hs_chapter": "HS84",
+        "destination": "HKG"
+      },
+      "top_terms": {
+        "n_destinations": 1.692,
+        "market_suppliers": 0.948,
+        "value": 0.801,
+        "years_exported": 0.483,
+        "value_prev2": 0.35,
+        "hs_chapter": 0.273,
+        "destination": 0.261,
+        "market_suppliers & n_destinations": -0.26
+      }
+    },
+    {
+      "case": "continued, predicted low risk",
+      "risk": 0.0,
+      "stopped": 0,
+      "features": {
+        "value": 793.608,
+        "value_prev": 309.189,
+        "value_prev2": 510.999,
+        "years_exported": 3,
+        "market_value": 4350.36,
+        "market_share": 0.1824235236,
+        "market_suppliers": 54,
+        "world_value": 32998573.619,
+        "price_ratio": 2.1019659107,
+        "n_destinations": 138,
+        "n_products_to_destination": 2791,
+        "hs_chapter": "HS61",
+        "destination": "MDV"
+      },
+      "top_terms": {
+        "destination": -4.272,
+        "market_suppliers & n_products_to_destination": -3.455,
+        "n_products_to_destination": 1.93,
+        "n_destinations": -1.769,
+        "value": -1.131,
+        "value & n_destinations": -0.859,
+        "value_prev2 & hs_chapter": -0.683,
+        "world_value": 0.44
+      }
+    },
+    {
+      "case": "continued, but predicted high risk",
+      "risk": 0.95,
+      "stopped": 0,
+      "features": {
+        "value": 3.774,
+        "value_prev": 0.0,
+        "value_prev2": 0.0,
+        "years_exported": 1,
+        "market_value": 17.523,
+        "market_share": 0.2153740798,
+        "market_suppliers": 4,
+        "world_value": 95374.355,
+        "price_ratio": 0.2498677195,
+        "n_destinations": 1,
+        "n_products_to_destination": 825,
+        "hs_chapter": "HS44",
+        "destination": "OMN"
+      },
+      "top_terms": {
+        "n_destinations": 1.692,
+        "market_suppliers": 0.948,
+        "years_exported": 0.483,
+        "destination": 0.476,
+        "market_suppliers & n_products_to_destination": 0.36,
+        "value_prev2": 0.35,
+        "world_value": -0.298,
+        "market_value": 0.269
+      }
+    }
+  ]
+}
