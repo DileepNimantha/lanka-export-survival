@@ -17,11 +17,12 @@ model:
   name: lanka-export-survival   # name in the MLflow model registry
   experiment: lanka-export-survival
   cat_features: [hs_chapter, destination]
-  catboost:
-    iterations: 400
-    learning_rate: 0.05
-    depth: 6
-    random_seed: 42
+  ebm:                   # Explainable Boosting Machine (interpret)
+    interactions: 10     # pairwise terms on top of one shape function per feature
+    outer_bags: 8        # bagged models averaged for stabler shape functions
+    learning_rate: 0.015
+    max_bins: 256
+    random_state: 42
 
 evaluate:
   top_k_fraction: 0.2    # analysts can only review the 20% of flows most at risk

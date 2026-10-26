@@ -1,19 +1,31 @@
-"""Score the trained model on the evaluation set, explain it with SHAP, log both to MLflow."""
+"""Score the trained model on the evaluation set, plot what it learned, log both to MLflow."""
 
 import json
 
 import matplotlib
 
 matplotlib.use("Agg")
+import joblib  # noqa: E402
 import matplotlib.pyplot as plt  # noqa: E402
 import mlflow  # noqa: E402
 import pandas as pd  # noqa: E402
-import shap  # noqa: E402
-from catboost import CatBoostClassifier, Pool  # noqa: E402
 
 from src import tracking
 from src.config import ROOT, load_params  # noqa: E402
 from src.metrics import score  # noqa: E402
+from src.train import MODEL_PATH  # noqa: E402
+
+
+def plot_importance(model, path, top: int = 15) -> None:
+    """EBM's global importance: the average absolute contribution of each term to the score."""
+    terms = pd.Series(model.term_importances(), index=model.term_names_).nlargest(top)
+    plt.figure(figsize=(8, 5))
+    terms.iloc[::-1].plot.barh(color="#3a6ea5")
+    plt.xlabel("mean absolute contribution (log-odds of stopping)")
+    plt.title("What the EBM relies on most")
+    plt.tight_layout()
+    plt.savefig(path, dpi=120)
+    plt.close("all")
 
 
 def main() -> None:
@@ -23,24 +35,15 @@ def main() -> None:
     df = pd.read_csv(ROOT / params["data"]["processed_dir"] / "eval.csv")
     X, y = df.drop(columns=["y"]), df["y"]
 
-    model = CatBoostClassifier()
-    model.load_model(str(ROOT / "models" / "model.cbm"))
+    model = joblib.load(MODEL_PATH)
     metrics = score(y, model.predict_proba(X)[:, 1], k)
     metrics["eval_rows"] = len(df)
     (ROOT / "eval_metrics.json").write_text(json.dumps(metrics, indent=2) + "\n")
     print(json.dumps(metrics, indent=2))
 
-    # SHAP: how much each feature pushed each prediction up or down.
-    sample = X.sample(min(500, len(X)), random_state=0)
-    pool = Pool(sample, cat_features=params["model"]["cat_features"])
-    shap_values = model.get_feature_importance(pool, type="ShapValues")[:, :-1]
-    plot_path = ROOT / "plots" / "shap_summary.png"
+    plot_path = ROOT / "plots" / "importance.png"
     plot_path.parent.mkdir(exist_ok=True)
-    plt.figure()
-    shap.summary_plot(shap_values, sample, show=False, max_display=12)
-    plt.tight_layout()
-    plt.savefig(plot_path, dpi=120)
-    plt.close("all")
+    plot_importance(model, plot_path)
 
     run_id = json.loads((ROOT / "run_info.json").read_text())["run_id"]
     with mlflow.start_run(run_id=run_id):

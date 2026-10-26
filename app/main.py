@@ -10,8 +10,8 @@ import uuid
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 
+import joblib
 import pandas as pd
-from catboost import CatBoostClassifier
 
 # Send request metrics to Application Insights when running in Azure.
 if os.getenv("APPLICATIONINSIGHTS_CONNECTION_STRING"):
@@ -23,7 +23,7 @@ from fastapi import FastAPI  # noqa: E402
 
 from app.schemas import FeedbackRequest, PredictionRequest, PredictionResponse  # noqa: E402
 
-MODEL_PATH = os.getenv("MODEL_PATH", "models/model.cbm")
+MODEL_PATH = os.getenv("MODEL_PATH", "models/model.joblib")
 MODEL_VERSION = os.getenv("MODEL_VERSION", "dev")
 THRESHOLD = float(os.getenv("DECISION_THRESHOLD", "0.5"))
 STATE: dict = {}
@@ -45,10 +45,9 @@ def log_event(event: dict) -> None:
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    model = CatBoostClassifier()
-    model.load_model(MODEL_PATH)
+    model = joblib.load(MODEL_PATH)  # a pickle: only load the model file built by the pipeline
     STATE["model"] = model
-    STATE["features"] = list(model.feature_names_)
+    STATE["features"] = list(model.feature_names_in_)
     yield
     STATE.clear()
 

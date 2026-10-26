@@ -72,6 +72,11 @@ destination country) present in year t is still exported in year t+1.
   the naive baseline), tourist reviews (used in a previous assignment), cricket (weaker
   real-world relevance).
 
-## Next decision (open)
-Run the quick baseline test on the extract, then choose the new algorithm (candidates:
-Explainable Boosting Machine, LightGBM, NGBoost — confirm which were not covered in lectures).
+## Decided: new algorithm (27 Oct 2026)
+**Explainable Boosting Machine** (`interpret`), a glass-box GA2M: one learned shape function per
+feature plus 10 pairwise interaction terms, fitted by cyclic gradient boosting and bagging.
+Chosen because it is interpretable by design (criterion 4) while competitive with black-box
+boosting. Replaces CatBoost everywhere (train, evaluate, gate, API, Docker, CD); the model is
+saved as `models/model.joblib` and logged with `mlflow.sklearn` (skops, EBM type trusted).
+Baselines in `src/experiments.py`: new-flow rule, logistic regression, decision tree, random
+forest, histogram gradient boosting. Still to confirm with the lecturer that EBM was not covered.
