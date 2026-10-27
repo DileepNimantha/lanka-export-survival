@@ -76,30 +76,41 @@ def main() -> None:
     cats = params["model"]["cat_features"]
     k = params["evaluate"]["top_k_fraction"]
     data_dir = ROOT / params["data"]["processed_dir"]
-    train, val = pd.read_csv(data_dir / "train.csv"), pd.read_csv(data_dir / "val.csv")
+    train = pd.read_csv(data_dir / "train.csv")
     X_tr, y_tr = train.drop(columns=["y"]), train["y"]
-    X_val, y_val = val.drop(columns=["y"]), val["y"]
+    # Models are compared on the validation year; the test years are only reported.
+    held_out = {
+        "val": pd.read_csv(data_dir / "val.csv"),
+        "test": pd.read_csv(data_dir / "eval.csv"),
+    }
 
     mlflow.set_experiment(params["model"]["experiment"] + "-experiments")
     results = []
     for name, model in build_models(params, list(X_tr.columns)).items():
-        X_fit, X_eval = X_tr, X_val
+        X_fit = X_tr
         if name == "hist_gradient_boosting":  # needs pandas 'category' columns
             X_fit = X_tr.astype({c: "category" for c in cats})
-            X_eval = X_val.astype({c: pd.CategoricalDtype(X_fit[c].cat.categories) for c in cats})
         with mlflow.start_run(run_name=name):
             started = time.time()
             model.fit(X_fit, y_tr)
-            metrics = score(y_val, model.predict_proba(X_eval)[:, 1], k)
-            metrics["fit_seconds"] = round(time.time() - started, 1)
+            row = {"model": name, "fit_seconds": round(time.time() - started, 1)}
+            for split, df in held_out.items():
+                X = df.drop(columns=["y"])
+                if name == "hist_gradient_boosting":
+                    X = X.astype({c: pd.CategoricalDtype(X_fit[c].cat.categories) for c in cats})
+                metrics = score(df["y"], model.predict_proba(X)[:, 1], k)
+                row.update({f"{split}_{key}": value for key, value in metrics.items()})
             mlflow.log_param("model_family", name)
-            mlflow.log_metrics(metrics)
-        results.append({"model": name, **metrics})
-        print(f"{name}: PR-AUC {metrics['pr_auc']:.3f} in {metrics['fit_seconds']:.0f}s")
+            mlflow.log_metrics({key: v for key, v in row.items() if key != "model"})
+        results.append(row)
+        print(f"{name}: val PR-AUC {row['val_pr_auc']:.3f} in {row['fit_seconds']:.0f}s")
 
     table = pd.DataFrame(results).set_index("model").round(3)
-    columns = ["pr_auc", "roc_auc", "recall_top_k", "fit_seconds"]
-    print(table[columns].sort_values("pr_auc", ascending=False))
+    columns = ["val_pr_auc", "val_roc_auc", "test_pr_auc", "test_roc_auc", "test_recall_top_k"]
+    table = table[[*columns, "fit_seconds"]].sort_values("val_pr_auc", ascending=False)
+    (ROOT / "reports").mkdir(exist_ok=True)
+    table.to_csv(ROOT / "reports" / "model_comparison.csv")
+    print(table)
 
 
 if __name__ == "__main__":

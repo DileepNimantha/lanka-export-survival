@@ -1,4 +1,4 @@
-.PHONY: doctor dvc-auth lint format test repro experiments serve docker-build docker-run
+.PHONY: doctor dvc-auth lint format test repro experiments tune serve docker-build docker-run
 
 doctor:  ## check that everything the workshop needs is ready
 	@echo "=== Tools ==="
@@ -35,6 +35,9 @@ repro:
 
 experiments:
 	uv run python -m src.experiments
+
+tune:  ## one-at-a-time EBM tuning on the validation year (about 40 minutes)
+	uv run python -m src.tune
 
 serve:
 	uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
