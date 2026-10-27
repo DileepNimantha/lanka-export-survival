@@ -10,7 +10,7 @@ set -euo pipefail
 REPO="${1:?usage: bootstrap.sh owner/repo image [region]}"
 IMAGE="${2:?usage: bootstrap.sh owner/repo image [region]}"
 REGION="${3:-}"
-RG="rg-mlops-workshop"
+RG="rg-lanka-export"
 HERE="$(cd "$(dirname "$0")" && pwd)"
 
 echo "== 1/4 Registering resource providers (first time takes 1-2 minutes)"
