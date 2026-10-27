@@ -37,7 +37,10 @@ FEATURES = list(FEATURE_SCHEMA.columns)
 
 
 def load_raw(path) -> pd.DataFrame:
-    return pd.read_csv(path, dtype={"product": str, "destination": str})
+    raw = pd.read_csv(path, dtype={"product": str, "destination": str})
+    if not raw["product"].str.fullmatch(r"\d{6}").all():
+        raise ValueError("product codes must be 6 digits (a leading zero was lost?)")
+    return raw
 
 
 def build_features(raw: pd.DataFrame, first_year: int) -> pd.DataFrame:

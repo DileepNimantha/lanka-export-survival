@@ -1,53 +1,53 @@
 {
   "ebm_importance": {
-    "destination": 0.727,
-    "n_destinations": 0.649,
-    "value": 0.403,
-    "market_suppliers": 0.377,
-    "years_exported": 0.331,
-    "n_products_to_destination": 0.314,
-    "value_prev2": 0.308,
-    "value_prev": 0.206,
-    "hs_chapter": 0.168,
-    "world_value": 0.148,
-    "market_share": 0.13,
-    "market_value": 0.096,
+    "destination": 0.736,
+    "n_destinations": 0.622,
+    "market_suppliers": 0.425,
+    "value": 0.398,
+    "years_exported": 0.329,
+    "n_products_to_destination": 0.322,
+    "value_prev2": 0.306,
+    "hs_chapter": 0.205,
+    "value_prev": 0.204,
+    "world_value": 0.14,
+    "market_share": 0.132,
+    "market_value": 0.09,
     "price_ratio": 0.047
   },
   "shap_importance": {
-    "n_destinations": 0.749,
-    "destination": 0.719,
-    "market_suppliers": 0.659,
-    "value": 0.387,
-    "value_prev2": 0.312,
-    "years_exported": 0.308,
-    "market_share": 0.305,
-    "value_prev": 0.253,
-    "n_products_to_destination": 0.218,
-    "hs_chapter": 0.213,
-    "world_value": 0.166,
-    "market_value": 0.12,
-    "price_ratio": 0.07
+    "destination": 0.728,
+    "n_destinations": 0.706,
+    "market_suppliers": 0.655,
+    "value": 0.468,
+    "value_prev2": 0.333,
+    "years_exported": 0.328,
+    "market_share": 0.264,
+    "value_prev": 0.254,
+    "hs_chapter": 0.253,
+    "n_products_to_destination": 0.229,
+    "world_value": 0.168,
+    "market_value": 0.115,
+    "price_ratio": 0.076
   },
-  "ebm_vs_shap_rank_correlation": 0.901,
+  "ebm_vs_shap_rank_correlation": 0.89,
   "directions": [
     {
       "feature": "value",
-      "spearman": -1.0,
+      "spearman": -0.999,
       "observed": "higher -> less risk",
       "expected": "higher -> less risk",
       "agrees": true
     },
     {
       "feature": "value_prev",
-      "spearman": -0.976,
+      "spearman": -0.987,
       "observed": "higher -> less risk",
       "expected": "higher -> less risk",
       "agrees": true
     },
     {
       "feature": "value_prev2",
-      "spearman": -0.958,
+      "spearman": -0.957,
       "observed": "higher -> less risk",
       "expected": null,
       "agrees": null
@@ -61,7 +61,7 @@
     },
     {
       "feature": "market_value",
-      "spearman": -0.982,
+      "spearman": -0.985,
       "observed": "higher -> less risk",
       "expected": null,
       "agrees": null
@@ -82,28 +82,28 @@
     },
     {
       "feature": "world_value",
-      "spearman": 0.96,
+      "spearman": 0.939,
       "observed": "higher -> more risk",
       "expected": null,
       "agrees": null
     },
     {
       "feature": "price_ratio",
-      "spearman": -0.011,
-      "observed": "flat",
+      "spearman": 0.235,
+      "observed": "higher -> more risk",
       "expected": null,
       "agrees": null
     },
     {
       "feature": "n_destinations",
-      "spearman": -0.984,
+      "spearman": -0.992,
       "observed": "higher -> less risk",
       "expected": "higher -> less risk",
       "agrees": true
     },
     {
       "feature": "n_products_to_destination",
-      "spearman": 0.764,
+      "spearman": 0.786,
       "observed": "higher -> more risk",
       "expected": null,
       "agrees": null
@@ -112,7 +112,7 @@
   "examples": [
     {
       "case": "stopped, predicted high risk",
-      "risk": 0.984,
+      "risk": 0.986,
       "stopped": 1,
       "features": {
         "value": 0.002,
@@ -130,14 +130,14 @@
         "destination": "HKG"
       },
       "top_terms": {
-        "n_destinations": 1.692,
-        "market_suppliers": 0.948,
-        "value": 0.801,
-        "years_exported": 0.483,
-        "value_prev2": 0.35,
-        "hs_chapter": 0.273,
-        "destination": 0.261,
-        "value_prev": 0.247
+        "n_destinations": 1.607,
+        "market_suppliers": 1.065,
+        "value": 0.825,
+        "years_exported": 0.481,
+        "value_prev2": 0.347,
+        "hs_chapter": 0.325,
+        "market_suppliers & hs_chapter": 0.267,
+        "value_prev": 0.243
       }
     },
     {
@@ -160,19 +160,19 @@
         "destination": "NLD"
       },
       "top_terms": {
-        "market_share & market_suppliers": -1.783,
-        "n_destinations": -1.769,
-        "value": -1.765,
-        "value_prev & n_destinations": -1.032,
-        "market_suppliers": -1.008,
-        "value & price_ratio": -0.877,
-        "n_destinations & n_products_to_destination": -0.589,
-        "value & n_destinations": -0.523
+        "market_share & market_suppliers": -2.427,
+        "value": -1.729,
+        "n_destinations": -1.56,
+        "value_prev & n_destinations": -1.276,
+        "value & price_ratio": -1.183,
+        "market_suppliers": -1.099,
+        "value & market_suppliers": 0.775,
+        "value & value_prev": -0.536
       }
     },
     {
       "case": "continued, but predicted high risk",
-      "risk": 0.962,
+      "risk": 0.965,
       "stopped": 0,
       "features": {
         "value": 0.981,
@@ -190,14 +190,14 @@
         "destination": "ETH"
       },
       "top_terms": {
-        "n_destinations": 1.692,
-        "market_suppliers": 1.057,
-        "destination": -0.814,
-        "hs_chapter": 0.575,
-        "years_exported": 0.483,
-        "market_value": 0.424,
-        "n_destinations & hs_chapter": 0.398,
-        "market_share & hs_chapter": 0.373
+        "n_destinations": 1.607,
+        "market_suppliers": 1.172,
+        "destination": -0.842,
+        "hs_chapter": 0.724,
+        "market_share & hs_chapter": 0.507,
+        "years_exported": 0.481,
+        "market_value": 0.425,
+        "value_prev2": 0.347
       }
     }
   ]

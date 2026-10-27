@@ -67,7 +67,9 @@ def main() -> None:
 
     iso3 = countries.set_index("country_code")["country_iso3"]
     raw = pd.concat(flows, ignore_index=True)
-    raw = raw.assign(destination=raw.j.map(iso3)).rename(
+    # pyarrow ignores dtype=str and reads HS codes as numbers, dropping the leading zero
+    # (tea 090240 -> 90240), so the 6-digit code is restored here.
+    raw = raw.assign(destination=raw.j.map(iso3), k=raw.k.astype(str).str.zfill(6)).rename(
         columns={"t": "year", "k": "product", "v": "value", "q": "quantity"}
     )
     columns = ["year", "destination", "product", "value", "quantity"]
