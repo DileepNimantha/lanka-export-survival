@@ -1,0 +1,12 @@
+run,param,value,pr_auc,roc_auc,recall_top_k,positive_rate,mean_prediction,roughness,fit_seconds
+base,base,,0.7372,0.8545,0.4343,0.3535,0.3254,3.9703,213.5
+interactions=0,interactions,0,0.736,0.8533,0.4329,0.3535,0.3292,3.9703,175.7
+interactions=3x,interactions,3x,0.7412,0.856,0.4366,0.3535,0.3246,3.9703,242.1
+smoothing_rounds=500,smoothing_rounds,500,0.7371,0.8545,0.4343,0.3535,0.325,4.0983,221.7
+smoothing_rounds=2000,smoothing_rounds,2000,0.7368,0.8544,0.4343,0.3535,0.3248,4.2335,232.0
+min_samples_leaf=50,min_samples_leaf,50,0.7372,0.8545,0.4343,0.3535,0.3254,3.9723,203.0
+min_samples_leaf=200,min_samples_leaf,200,0.7378,0.8547,0.434,0.3535,0.3254,3.9146,207.4
+max_bins=64,max_bins,64,0.7354,0.854,0.4355,0.3535,0.3274,2.0822,166.6
+max_bins=1024,max_bins,1024,0.7368,0.8544,0.4336,0.3535,0.3251,5.7946,234.5
+learning_rate=0.005,learning_rate,0.005,0.7382,0.855,0.4353,0.3535,0.3253,3.1648,396.5
+learning_rate=0.05,learning_rate,0.05,0.7365,0.8541,0.4341,0.3535,0.3251,4.8702,107.0

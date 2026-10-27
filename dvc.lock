@@ -102,7 +102,7 @@ stages:
           - hs_chapter
           - destination
           ebm:
-            interactions: 10
+            interactions: 3x
             outer_bags: 8
             learning_rate: 0.015
             max_bins: 256
@@ -110,11 +110,11 @@ stages:
     outs:
     - path: models/model.joblib
       hash: md5
-      md5: 4371c9dff0bace2cc9d9d9a14e2c2c69
-      size: 3684075
+      md5: 267caa9a91b07716bbb285838219cfc7
+      size: 14607659
     - path: run_info.json
       hash: md5
-      md5: 2dd9fc5c02428cf62a56ac34a8b4b466
+      md5: 14d39765781d425a83f60629c24bf3cd
       size: 112
   evaluate:
     cmd: uv run python -m src.evaluate
@@ -125,8 +125,8 @@ stages:
       size: 9808633
     - path: models/model.joblib
       hash: md5
-      md5: 4371c9dff0bace2cc9d9d9a14e2c2c69
-      size: 3684075
+      md5: 267caa9a91b07716bbb285838219cfc7
+      size: 14607659
     - path: src/evaluate.py
       hash: md5
       md5: 6843e1e32e7d0f0aa03ac26f486fe69b
@@ -141,12 +141,12 @@ stages:
     outs:
     - path: eval_metrics.json
       hash: md5
-      md5: bcc58c7a100ae1541c254a42e8972a72
-      size: 207
+      md5: cde92adec83d7775babb10d43c6be0bd
+      size: 209
     - path: plots/importance.png
       hash: md5
-      md5: c8616804ed818ef60f6204fce2bc3788
-      size: 47487
+      md5: ee1eff8d1f1fc931c056cb804f450d85
+      size: 47228
   explain:
     cmd: uv run python -m src.explain
     deps:
@@ -156,11 +156,11 @@ stages:
       size: 9808633
     - path: models/model.joblib
       hash: md5
-      md5: 4371c9dff0bace2cc9d9d9a14e2c2c69
-      size: 3684075
+      md5: 267caa9a91b07716bbb285838219cfc7
+      size: 14607659
     - path: run_info.json
       hash: md5
-      md5: 2dd9fc5c02428cf62a56ac34a8b4b466
+      md5: 14d39765781d425a83f60629c24bf3cd
       size: 112
     - path: src/explain.py
       hash: md5
@@ -176,10 +176,10 @@ stages:
     outs:
     - path: explain_summary.json
       hash: md5
-      md5: 2c92dd6b09fa41248e076166632aae64
-      size: 5232
+      md5: c9c9601af2ea58ba7bc07e4f449aafea
+      size: 5239
     - path: plots/explain
       hash: md5
-      md5: 4ba4c60a3c70303b4e16e047b358f64f.dir
-      size: 537180
+      md5: b26dc8decc673d0e6b9d9f67eb325951.dir
+      size: 544428
       nfiles: 4

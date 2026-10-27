@@ -18,7 +18,7 @@ model:
   experiment: lanka-export-survival
   cat_features: [hs_chapter, destination]
   ebm:                   # Explainable Boosting Machine (interpret)
-    interactions: 10     # pairwise terms on top of one shape function per feature
+    interactions: 3x     # pairwise terms (3 x 13 features); tuned on 2019, see reports/tuning.csv
     outer_bags: 8        # bagged models averaged for stabler shape functions
     learning_rate: 0.015
     max_bins: 256

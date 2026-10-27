@@ -1,0 +1,7 @@
+model,val_pr_auc,val_roc_auc,test_pr_auc,test_roc_auc,test_recall_top_k,fit_seconds
+hist_gradient_boosting,0.744,0.859,0.691,0.851,0.465,1.9
+ebm,0.741,0.856,0.691,0.85,0.467,242.2
+random_forest,0.737,0.851,0.691,0.848,0.469,3.7
+logistic_regression,0.731,0.851,0.685,0.846,0.461,0.8
+decision_tree,0.711,0.842,0.673,0.839,0.457,0.8
+rule_new_flow,0.53,0.734,0.504,0.731,0.398,0.0

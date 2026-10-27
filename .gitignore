@@ -14,3 +14,4 @@ gate_report.md
 .DS_Store
 docs/*.pdf
 data/cache/
+logs/
