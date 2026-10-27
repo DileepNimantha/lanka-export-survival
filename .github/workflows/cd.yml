@@ -1,7 +1,8 @@
 name: CD
 
-# On every push to main: build the image with the committed model, deploy it to Azure
-# as a canary after approval, then mark that model version as @champion.
+# On every push to main: build the API image (with the committed model) and the front end
+# image, deploy the API to Azure as a canary after approval, then the front end, then mark
+# that model version as @champion.
 on:
   push:
     branches: [main]
@@ -21,6 +22,7 @@ env:
   DAGSHUB_OWNER: ${{ vars.DAGSHUB_OWNER }}
   DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
   APP_NAME: ca-lanka-export
+  UI_NAME: ca-lanka-export-ui
   RESOURCE_GROUP: rg-lanka-export
 
 jobs:
@@ -37,11 +39,11 @@ jobs:
         with:
           version: "0.11.7"
 
-      - name: Pull the exact model CI tested
+      - name: Pull the exact model CI tested, and the front end's lookup table
         run: |
           uv sync --frozen
           make dvc-auth
-          uv run dvc pull models/model.joblib
+          uv run dvc pull models/model.joblib data/catalog/flows.csv
 
       - name: Image name (registries need lowercase)
         id: name
@@ -60,6 +62,10 @@ jobs:
           docker build --build-arg MODEL_VERSION="$TAG" -t "$IMAGE:$TAG" -t "$IMAGE:latest" .
           docker push "$IMAGE:$TAG"
           docker push "$IMAGE:latest"
+          # The front end goes into the same (public) package, with ui- tags.
+          docker build -f Dockerfile.ui -t "$IMAGE:ui-$TAG" -t "$IMAGE:ui-latest" .
+          docker push "$IMAGE:ui-$TAG"
+          docker push "$IMAGE:ui-latest"
 
   deploy:
     needs: build
@@ -70,6 +76,8 @@ jobs:
       IMAGE: ${{ needs.build.outputs.image }}
       TAG: ${{ needs.build.outputs.tag }}
     steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+
       - name: Log in to Azure without a password (OIDC)
         uses: azure/login@a641126d1b8aa4d1fa005f4f92df94a3a4c4c906  # v3.1.0
         with:
@@ -119,6 +127,28 @@ jobs:
             --revision-weight "$NEW=100" -o none
           echo "Rollback, if ever needed: az containerapp ingress traffic set -n $APP_NAME \
             -g $RESOURCE_GROUP --revision-weight $OLD=100" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Deploy the front end, pointing at the API (created on the first run)
+        run: |
+          ENV_ID=$(az containerapp show -n "$APP_NAME" -g "$RESOURCE_GROUP" \
+            --query properties.environmentId -o tsv)
+          API=$(az containerapp show -n "$APP_NAME" -g "$RESOURCE_GROUP" \
+            --query properties.configuration.ingress.fqdn -o tsv)
+          az deployment group create -g "$RESOURCE_GROUP" -n frontend \
+            --template-file infra/ui.bicep -o none \
+            --parameters environmentId="$ENV_ID" image="$IMAGE:ui-$TAG" apiUrl="https://$API"
+          UI=$(az containerapp show -n "$UI_NAME" -g "$RESOURCE_GROUP" \
+            --query properties.configuration.ingress.fqdn -o tsv)
+          for attempt in $(seq 1 30); do
+            if curl -sf "https://$UI/_stcore/health"; then
+              echo
+              echo "Front end: https://$UI" >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "::error::The front end never became healthy."
+          exit 1
 
   promote:
     needs: [build, deploy]

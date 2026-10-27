@@ -8,3 +8,4 @@ tests
 monitoring
 replayer
 *.md
+!data/catalog/flows.csv
