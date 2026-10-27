@@ -5,16 +5,21 @@ stages:
     deps:
     - path: src/download.py
       hash: md5
-      md5: a067ee3862ba98d011846ab405fcd334
-      size: 3390
+      md5: 0d82cb84c34f1f2683ff3c57c74181c5
+      size: 3568
     params:
       params.yaml:
+        data.countries: data/raw/country_codes.csv
         data.exporter_code: 144
         data.products: data/raw/product_codes.csv
         data.raw: data/raw/sl_exports.csv
         data.url: 
           https://www.cepii.fr/DATA_DOWNLOAD/baci/data/BACI_HS12_V202601.zip
     outs:
+    - path: data/raw/country_codes.csv
+      hash: md5
+      md5: 953f839cc8983942410e609641e7fb36
+      size: 3589
     - path: data/raw/product_codes.csv
       hash: md5
       md5: b60c01b022f7e28bc70ac2cb427e64e9
@@ -36,8 +41,8 @@ stages:
       size: 38004735
     - path: src/data.py
       hash: md5
-      md5: 72b2ce66e75c8702417e582f964efe0a
-      size: 6201
+      md5: 5e8375683ed61c2c2fe4b6d68e4f3591
+      size: 6483
     params:
       params.yaml:
         data:
@@ -46,6 +51,8 @@ stages:
           exporter_code: 144
           raw: data/raw/sl_exports.csv
           products: data/raw/product_codes.csv
+          countries: data/raw/country_codes.csv
+          catalog: data/catalog/flows.csv
           production: data/production/labelled.csv
           processed_dir: data/processed
           first_year: 2014
@@ -183,3 +190,34 @@ stages:
       md5: ae9b9ee20c5e9a4bbc01027ae3d33647.dir
       size: 541437
       nfiles: 4
+  catalog:
+    cmd: uv run python -m src.catalog
+    deps:
+    - path: data/raw/country_codes.csv
+      hash: md5
+      md5: 953f839cc8983942410e609641e7fb36
+      size: 3589
+    - path: data/raw/product_codes.csv
+      hash: md5
+      md5: b60c01b022f7e28bc70ac2cb427e64e9
+      size: 573394
+    - path: data/raw/sl_exports.csv
+      hash: md5
+      md5: 5da932df5f0dcb5b07fb83d9297e6d7b
+      size: 38004735
+    - path: src/catalog.py
+      hash: md5
+      md5: 512121b6502c8c92e69e1530b89d2d9e
+      size: 1829
+    - path: src/data.py
+      hash: md5
+      md5: 5e8375683ed61c2c2fe4b6d68e4f3591
+      size: 6483
+    params:
+      params.yaml:
+        data.catalog: data/catalog/flows.csv
+    outs:
+    - path: data/catalog/flows.csv
+      hash: md5
+      md5: 1e77098d01aceffc09f6a6c550bb288d
+      size: 11189033

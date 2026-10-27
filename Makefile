@@ -1,4 +1,4 @@
-.PHONY: doctor dvc-auth lint format test repro experiments tune serve docker-build docker-run
+.PHONY: doctor dvc-auth lint format test repro experiments tune serve ui docker-build docker-run
 
 doctor:  ## check that everything the workshop needs is ready
 	@echo "=== Tools ==="
@@ -41,6 +41,9 @@ tune:  ## one-at-a-time EBM tuning on the validation year (about 40 minutes)
 
 serve:
 	uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+ui:  ## the Streamlit front end; expects the API at API_URL (default http://localhost:8000)
+	uv run streamlit run ui/app.py
 
 docker-build:
 	docker build --build-arg MODEL_VERSION=local -t lanka-export-survival:local .

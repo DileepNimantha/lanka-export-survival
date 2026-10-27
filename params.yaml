@@ -3,6 +3,8 @@ data:
   exporter_code: 144     # Sri Lanka in BACI's country codes
   raw: data/raw/sl_exports.csv
   products: data/raw/product_codes.csv
+  countries: data/raw/country_codes.csv
+  catalog: data/catalog/flows.csv   # newest year's flows with names, for the front end
   production: data/production/labelled.csv
   processed_dir: data/processed
   first_year: 2014       # needs two earlier years (2012, 2013) for the history features

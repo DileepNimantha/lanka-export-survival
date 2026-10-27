@@ -78,6 +78,9 @@ def main() -> None:
     out.parent.mkdir(parents=True, exist_ok=True)
     raw[columns].to_csv(out, index=False)
     products.to_csv(ROOT / p["products"], index=False)
+    countries.rename(columns={"country_iso3": "iso3", "country_name": "name"})[
+        ["iso3", "name"]
+    ].drop_duplicates("iso3").to_csv(ROOT / p["countries"], index=False)
     print(f"Saved {out} ({len(raw):,} rows, {out.stat().st_size / 1e6:.1f} MB)")
 
 
