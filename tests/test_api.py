@@ -1,3 +1,4 @@
+import math
 import os
 
 import joblib
@@ -61,3 +62,16 @@ def test_feedback(client, payload):
     request_id = client.post("/predict", json=payload).json()["request_id"]
     response = client.post("/feedback", json={"request_id": request_id, "actual_outcome": 1})
     assert response.status_code == 200
+
+
+def test_explain_adds_up_to_the_prediction(client, payload):
+    body = client.post("/explain", json=payload).json()
+    log_odds = body["baseline"] + sum(c["contribution"] for c in body["contributions"])
+    assert abs(1 / (1 + math.exp(-log_odds)) - body["probability"]) < 1e-3
+    sizes = [abs(c["contribution"]) for c in body["contributions"]]
+    assert sizes == sorted(sizes, reverse=True)
+
+
+def test_explain_uses_the_same_contract(client, payload):
+    payload["market_share"] = 35.0
+    assert client.post("/explain", json=payload).status_code == 422

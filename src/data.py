@@ -43,8 +43,9 @@ def load_raw(path) -> pd.DataFrame:
     return raw
 
 
-def build_features(raw: pd.DataFrame, first_year: int) -> pd.DataFrame:
-    """Add history, market and label columns. The last year has no label, so it is dropped."""
+def add_features(raw: pd.DataFrame) -> pd.DataFrame:
+    """Add history, market and label columns for every year. The newest year's label is
+    meaningless (there is no next year yet), so callers that train must drop it."""
     key = ["destination", "product"]
     df = raw.copy()
 
@@ -68,7 +69,13 @@ def build_features(raw: pd.DataFrame, first_year: int) -> pd.DataFrame:
     df["n_products_to_destination"] = df.groupby(["year", "destination"]).product.transform("size")
     df["hs_chapter"] = "HS" + df["product"].str[:2]
     df["y"] = df.value_next.isna().astype(int)
+    return df
 
+
+def build_features(raw: pd.DataFrame, first_year: int) -> pd.DataFrame:
+    """The model table: years with a known label, from first_year on."""
+    key = ["destination", "product"]
+    df = add_features(raw)
     last_year = df.year.max()
     df = df[(df.year >= first_year) & (df.year < last_year)]
     return df.drop(columns=["value_next"]).sort_values(["year", *key]).reset_index(drop=True)

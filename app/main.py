@@ -21,7 +21,13 @@ if os.getenv("APPLICATIONINSIGHTS_CONNECTION_STRING"):
 
 from fastapi import FastAPI  # noqa: E402
 
-from app.schemas import FeedbackRequest, PredictionRequest, PredictionResponse  # noqa: E402
+from app.schemas import (  # noqa: E402
+    Contribution,
+    ExplanationResponse,
+    FeedbackRequest,
+    PredictionRequest,
+    PredictionResponse,
+)
 
 MODEL_PATH = os.getenv("MODEL_PATH", "models/model.joblib")
 MODEL_VERSION = os.getenv("MODEL_VERSION", "dev")
@@ -65,9 +71,7 @@ def version() -> dict:
     return {"model_version": MODEL_VERSION}
 
 
-@app.post("/predict", response_model=PredictionResponse)
-def predict(req: PredictionRequest) -> PredictionResponse:
-    start = time.perf_counter()
+def score(req: PredictionRequest) -> tuple[dict, pd.DataFrame, PredictionResponse]:
     features = req.model_dump(by_alias=True)
     X = pd.DataFrame([features])[STATE["features"]]
     probability = float(STATE["model"].predict_proba(X)[0, 1])
@@ -77,15 +81,44 @@ def predict(req: PredictionRequest) -> PredictionResponse:
         prediction=int(probability >= THRESHOLD),
         model_version=MODEL_VERSION,
     )
+    return features, X, response
+
+
+def log_prediction(response: PredictionResponse, features: dict, start: float) -> None:
     log_event(
         {
             "event": "prediction",
-            **response.model_dump(),
+            **response.model_dump(include=set(PredictionResponse.model_fields)),
             "latency_ms": round((time.perf_counter() - start) * 1000, 2),
             "features": features,
         }
     )
+
+
+@app.post("/predict", response_model=PredictionResponse)
+def predict(req: PredictionRequest) -> PredictionResponse:
+    start = time.perf_counter()
+    features, _, response = score(req)
+    log_prediction(response, features, start)
     return response
+
+
+@app.post("/explain", response_model=ExplanationResponse)
+def explain(req: PredictionRequest) -> ExplanationResponse:
+    """The prediction plus why: the EBM is additive, so each term's contribution is exact."""
+    start = time.perf_counter()
+    features, X, response = score(req)
+    model = STATE["model"]
+    terms = sorted(
+        zip(model.term_names_, model.eval_terms(X)[0], strict=True), key=lambda t: -abs(t[1])
+    )
+    explanation = ExplanationResponse(
+        **response.model_dump(),
+        baseline=round(float(model.intercept_[0]), 5),
+        contributions=[Contribution(term=t, contribution=round(float(c), 5)) for t, c in terms],
+    )
+    log_prediction(explanation, features, start)
+    return explanation
 
 
 @app.post("/feedback")

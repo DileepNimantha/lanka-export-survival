@@ -27,6 +27,16 @@ class PredictionResponse(BaseModel):
     model_version: str
 
 
+class Contribution(BaseModel):
+    term: str  # a feature, or two features joined by " & " for an interaction
+    contribution: float  # log-odds of stopping; positive raises the risk
+
+
+class ExplanationResponse(PredictionResponse):
+    baseline: float  # the model's intercept: log-odds before any feature is taken into account
+    contributions: list[Contribution]  # largest effect first; baseline + sum = log-odds
+
+
 class FeedbackRequest(BaseModel):
     request_id: str
     actual_outcome: int = Field(ge=0, le=1)

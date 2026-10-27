@@ -8,9 +8,11 @@ stages:
       - data.exporter_code
       - data.raw
       - data.products
+      - data.countries
     outs:
       - data/raw/sl_exports.csv
       - data/raw/product_codes.csv
+      - data/raw/country_codes.csv
 
   prepare:
     cmd: uv run python -m src.data
@@ -25,6 +27,19 @@ stages:
       - data/processed/val.csv
       - data/processed/eval.csv
       - data/processed/future.csv
+
+  catalog:
+    cmd: uv run python -m src.catalog
+    deps:
+      - src/catalog.py
+      - src/data.py
+      - data/raw/sl_exports.csv
+      - data/raw/product_codes.csv
+      - data/raw/country_codes.csv
+    params:
+      - data.catalog
+    outs:
+      - data/catalog/flows.csv
 
   train:
     cmd: uv run python -m src.train
