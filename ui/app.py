@@ -96,7 +96,13 @@ def contribution_chart(result: dict, features: dict, top: int = 8) -> alt.Chart:
         .mark_bar()
         .encode(
             x=alt.X("contribution:Q", title="effect on the risk (log-odds)"),
-            y=alt.Y("label:N", sort=None, title=None, axis=alt.Axis(labelLimit=420)),
+            y=alt.Y(
+                "label:N",
+                sort=None,
+                title=None,
+                # never drop a label: every bar must say which fact it is
+                axis=alt.Axis(labelLimit=520, labelOverlap=False, labelFontSize=12),
+            ),
             color=alt.Color(
                 "effect:N",
                 scale=alt.Scale(
@@ -106,7 +112,7 @@ def contribution_chart(result: dict, features: dict, top: int = 8) -> alt.Chart:
             ),
             tooltip=["label", alt.Tooltip("contribution:Q", format="+.3f")],
         )
-        .properties(height=34 * len(shown))
+        .properties(height=alt.Step(34))  # a fixed height per bar
     )
 
 
@@ -183,27 +189,25 @@ st.progress(risk)
 
 reasons = [c for c in result["contributions"] if abs(c["contribution"]) > 0.05][:3]
 if reasons:
-    text = "; ".join(
-        f"**{term_label(c['term'], features)}** "
-        f"{'raises' if c['contribution'] > 0 else 'lowers'} the risk"
+    lines = [
+        f"- {term_label(c['term'], features)} **{'raises' if c['contribution'] > 0 else 'lowers'}**"
+        " the risk"
         for c in reasons
-    )
-    st.markdown(f"Main reasons: {text}.")
+    ]
+    # "$" starts a formula in Streamlit markdown, so dollar amounts are escaped
+    st.markdown("Main reasons:\n" + "\n".join(lines).replace("$", "\\$"))
 
-chart, facts = st.columns([3, 2])
-with chart:
-    st.markdown("##### Why: each fact's effect on the risk")
-    st.altair_chart(contribution_chart(result, features), width="stretch")
-    st.caption(
-        "The model adds these effects to the starting point. Red bars push the risk up, "
-        "green bars pull it down. Labels with × are pairs of facts the model learned together."
-    )
-with facts:
-    st.markdown("##### The facts the model used")
+st.markdown("##### Why: each fact's effect on the risk")
+st.altair_chart(contribution_chart(result, features), width="stretch")
+st.caption(
+    "The model adds these effects to the starting point. Red bars push the risk up, "
+    "green bars pull it down. Labels with × are pairs of facts the model learned together."
+)
+with st.expander("The facts the model used", expanded=True):
     table = pd.DataFrame(
         {"Fact": [LABELS[f] for f in FEATURES], "Value": [show(f, features[f]) for f in FEATURES]}
     )
-    st.dataframe(table, hide_index=True, width="stretch")
+    st.table(table.set_index("Fact"))
 
 st.caption(
     f"Model version {result['model_version']} · data: CEPII BACI HS12 (Etalab 2.0 licence) · "
