@@ -1,5 +1,4 @@
 model,val_pr_auc,val_roc_auc,test_pr_auc,test_roc_auc,test_recall_top_k,fit_seconds
-hist_gradient_boosting,0.743,0.859,0.692,0.852,0.467,2.4
 ebm,0.743,0.857,0.691,0.851,0.467,273.2
 random_forest,0.738,0.851,0.692,0.848,0.468,4.3
 logistic_regression,0.733,0.852,0.685,0.846,0.462,0.6

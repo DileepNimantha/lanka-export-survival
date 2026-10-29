@@ -8,7 +8,7 @@ import mlflow
 import numpy as np
 import pandas as pd
 from sklearn.compose import ColumnTransformer
-from sklearn.ensemble import HistGradientBoostingClassifier, RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import FunctionTransformer, OneHotEncoder, StandardScaler
@@ -63,9 +63,6 @@ def build_models(params: dict, columns: list[str]) -> dict:
                 n_estimators=300, min_samples_leaf=20, n_jobs=-1, random_state=42
             ),
         ),
-        "hist_gradient_boosting": HistGradientBoostingClassifier(
-            categorical_features="from_dtype", max_iter=400, learning_rate=0.05, random_state=42
-        ),
         "ebm": make_ebm(params["model"]["ebm"], columns, cats),
     }
 
@@ -73,7 +70,6 @@ def build_models(params: dict, columns: list[str]) -> dict:
 def main() -> None:
     tracking.configure()
     params = load_params()
-    cats = params["model"]["cat_features"]
     k = params["evaluate"]["top_k_fraction"]
     data_dir = ROOT / params["data"]["processed_dir"]
     train = pd.read_csv(data_dir / "train.csv")
@@ -87,18 +83,12 @@ def main() -> None:
     mlflow.set_experiment(params["model"]["experiment"] + "-experiments")
     results = []
     for name, model in build_models(params, list(X_tr.columns)).items():
-        X_fit = X_tr
-        if name == "hist_gradient_boosting":  # needs pandas 'category' columns
-            X_fit = X_tr.astype({c: "category" for c in cats})
         with mlflow.start_run(run_name=name):
             started = time.time()
-            model.fit(X_fit, y_tr)
+            model.fit(X_tr, y_tr)
             row = {"model": name, "fit_seconds": round(time.time() - started, 1)}
             for split, df in held_out.items():
-                X = df.drop(columns=["y"])
-                if name == "hist_gradient_boosting":
-                    X = X.astype({c: pd.CategoricalDtype(X_fit[c].cat.categories) for c in cats})
-                metrics = score(df["y"], model.predict_proba(X)[:, 1], k)
+                metrics = score(df["y"], model.predict_proba(df.drop(columns=["y"]))[:, 1], k)
                 row.update({f"{split}_{key}": value for key, value in metrics.items()})
             mlflow.log_param("model_family", name)
             mlflow.log_metrics({key: v for key, v in row.items() if key != "model"})
