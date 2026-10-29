@@ -116,12 +116,12 @@ def contribution_chart(result: dict, features: dict, top: int = 8) -> alt.Chart:
     )
 
 
-st.set_page_config(page_title="Sri Lanka export survival", page_icon="🇱🇰", layout="wide")
-st.title("Will this export survive next year?")
+st.set_page_config(page_title="Sri Lankan export markets at risk", page_icon="🇱🇰", layout="wide")
+st.title("Predicting which Sri Lankan export markets are at risk")
 st.caption(
-    "Pick one of Sri Lanka's export flows (a product sold to a country). An Explainable "
-    "Boosting Machine trained on CEPII BACI trade data estimates the chance that Sri Lanka "
-    "stops exporting it next year, and shows exactly which facts drive that estimate."
+    "Pick a product and a country Sri Lanka sells it to. An Explainable Boosting Machine "
+    "trained on CEPII BACI trade data estimates the chance that Sri Lanka will not sell that "
+    "product to that country next year, and shows exactly which facts drive that estimate."
 )
 
 catalog = load_catalog()
